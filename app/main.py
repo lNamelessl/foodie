@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends
 from .database import get_db
 from sqlalchemy.orm import Session
 from . import models
-from .routers import food
+from .routers import food,order,user
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -26,3 +26,5 @@ def say_hello():
 # )
 
 app.include_router(food.router)
+app.include_router(order.router)
+app.include_router(user.router)
