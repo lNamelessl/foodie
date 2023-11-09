@@ -16,3 +16,9 @@ class UserOut(BaseModel):
 class UserCreate(BaseModel):
     email:EmailStr
     password:str
+
+class UserLogin(UserCreate):
+    pass
+
+class TokenData(Order):
+    pass
