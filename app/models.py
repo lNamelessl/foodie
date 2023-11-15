@@ -42,3 +42,15 @@ class User(Base):
                         nullable=False, server_default=text('now()'))
     phone_number = Column(String,nullable=True)
     orders = Column(String,nullable=False,unique=True)
+    orders = relationship("Orders", back_populates="owner")
+
+
+class Orders(Base):
+    __tablename__ = "orders"
+
+    food = Column(String,nullable=False)
+    price = Column(Integer,nullable=False)
+    id = Column(Integer,primary_key=True,nullable=False)
+    owner_id = Column(Integer,ForeignKey("users.id",ondelete="CASCADE"),nullable=False)
+    order_id = Column(Integer,primary_key=True,nullable=False)
+    owner = relationship("User", back_populates="orders")

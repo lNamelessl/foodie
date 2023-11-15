@@ -22,3 +22,7 @@ class UserLogin(UserCreate):
 
 class TokenData(Order):
     pass
+
+class Checkout(BaseModel):
+    food: str
+    price: int
