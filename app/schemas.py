@@ -26,3 +26,4 @@ class TokenData(Order):
 class Checkout(BaseModel):
     food: str
     price: int
+    id:int

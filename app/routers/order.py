@@ -71,14 +71,27 @@ def order_drinks(order:schemas.Order, db: Session = Depends(get_db),current_user
     db.commit()
     
     return f"message:" "You've successfully placed your order,"  f" (subtotal: ₦{total})"
+
+
     
 
 @router.get("/checkout",response_model=List[schemas.Checkout])
 def checkout(db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
     orders = db.query(models.Orders).filter(models.Orders.owner_id==current_user.id).all()
-
-    print (orders)
     return orders
+
+@router.delete("/delete_order")
+def delete_order(order: schemas.Order, db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
+    query = db.query(models.Orders).filter(models.Orders.id == order.id)
+    order = query.first()
+    if order == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"order does not exist")
+    if order.owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="not authorised to perform this action")
+    query.delete(synchronize_session=False)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
 
 def total_cost(price):
     global total
