@@ -5,6 +5,7 @@ from app.database import get_db
 from typing import List
 from pydantic import BaseModel, Field,Json
 import json
+from sqlalchemy import func
 
 
 total = 0
@@ -14,14 +15,14 @@ router = APIRouter(prefix="/order", tags=["Order"])
 
 @router.post("/main",status_code=status.HTTP_201_CREATED,)
 def order_main_dish(user_order:schemas.Order, db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
-    global total
+    
     order = db.query(models.MainDish).filter(models.MainDish.id == user_order.id).first()
     price = order.price
     if not user_order:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="meal doesn't exist")
     new_order = models.Orders(owner_id=current_user.id,order_id=order.id,food=order.main_dish,price=price)
     
-    total_costs = total_cost(price)
+    total = total_cost(db=db)
     db.add(new_order)
     db.commit()
     
@@ -66,7 +67,7 @@ def order_drinks(order:schemas.Order, db: Session = Depends(get_db),current_user
     if not order:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="meal doesn't exist")
     new_order = models.Orders(owner_id=current_user.id,order_id=order.id,food=order.drinks,price=price)
-    total_costs = total_cost(price)
+    total_costs = total_cost()
     db.add(new_order)
     db.commit()
     
@@ -77,6 +78,7 @@ def order_drinks(order:schemas.Order, db: Session = Depends(get_db),current_user
 
 @router.get("/checkout",response_model=List[schemas.Checkout])
 def checkout(db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
+    global total
     orders = db.query(models.Orders).filter(models.Orders.owner_id==current_user.id).all()
     return orders
 
@@ -93,12 +95,18 @@ def delete_order(order: schemas.Order, db: Session = Depends(get_db),current_use
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-def total_cost(price):
-    global total
-    total += price
+# def total_cost(price):
+#     global total
+#     total += price
+#     return total
+ 
+@router.get("/t",)
+def total_cost(db,current_user: int = Depends(oauth2.get_current_user)):
+    total = db.query(func.sum(models.Orders.price)).all()
+    total  = {"total": int(f"{total[0][0]}")}
+    print(total)
     return total
 
 
-
-#track user orders, calculate amount and checkout
+# track user orders, calculate amount and checkout
 

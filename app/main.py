@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 @app.get("/")
 def say_hello():
-  return "Hello World"
+  return "Hello World👨🏼👨🏼👨🏼"
 
 
 

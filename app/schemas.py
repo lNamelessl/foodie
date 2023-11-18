@@ -27,3 +27,6 @@ class Checkout(BaseModel):
     food: str
     price: int
     id:int
+
+class Total(BaseModel):
+    price: int
