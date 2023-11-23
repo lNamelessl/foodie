@@ -54,3 +54,5 @@ class Orders(Base):
     owner_id = Column(Integer,ForeignKey("users.id",ondelete="CASCADE"),nullable=False)
     order_id = Column(Integer,primary_key=True,nullable=False)
     owner = relationship("User", back_populates="orders")
+    created_at = Column(TIMESTAMP(timezone=True),nullable=False,server_default=text('now()'))
+    payment = Column(Boolean,nullable=False,default=False)

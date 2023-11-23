@@ -23,10 +23,16 @@ class UserLogin(UserCreate):
 class TokenData(Order):
     pass
 
-class Checkout(BaseModel):
+class CheckOut(BaseModel):
+    id:int
     food: str
     price: int
-    id:int
+    created_at:datetime
+    payment:bool
+  
+class TotalCost(BaseModel):
+    total:int
 
-class Total(BaseModel):
-    price: int
+class Payment(BaseModel):
+    payment:int
+
