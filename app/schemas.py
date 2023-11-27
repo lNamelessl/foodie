@@ -36,3 +36,6 @@ class TotalCost(BaseModel):
 class Payment(BaseModel):
     payment:int
 
+class PaymentDb(Payment):
+    order_id :int
+

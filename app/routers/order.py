@@ -5,7 +5,7 @@ from app.database import get_db
 from typing import List
 from pydantic import BaseModel, Field
 from app.models import Orders
-from sqlalchemy import func
+from sqlalchemy import func,Update
 
 
 total = 0
@@ -116,7 +116,7 @@ def total_cost(db: Session = Depends(get_db),current_user: int = Depends(oauth2.
     return total
 
 
-@router.put("/payment",)
+@router.put("/payment",status_code=status.HTTP_202_ACCEPTED)
 def payment(payment:schemas.Payment, db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
     total = total_cost(db=db)
     payment= payment.model_dump()
@@ -124,12 +124,10 @@ def payment(payment:schemas.Payment, db: Session = Depends(get_db),current_user:
     total = total["total"]
     if total == payment:
         order_query = db.query(models.Orders)
-        order = models.Orders(payment=True)
-        # order = {"payment":True}
-        order_query.update(order,synchronize_session=False)
+        updated_payment = Update(Orders).where(Orders.owner_id == current_user.id ).values(food = 'Jollof Rice',payment = True)
+        db.execute(updated_payment)
         db.commit()
-        return  order_query.first()
-        return {"You've successfully placed your order"}
+        return  order_query.all()
 
 
 # track user orders, calculate amount and checkout
