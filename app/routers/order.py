@@ -12,45 +12,47 @@ router = APIRouter(tags=["Order"])
 # Adds all the price columns and returns the total
 @router.get("/total",status_code=status.HTTP_202_ACCEPTED)
 def total_cost(db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
-    total = db.query(func.sum(models.Orders.price)).filter(models.Orders.owner_id == current_user.id).all()
+    total = db.query(func.sum(models.Orders.price)).filter(models.Orders.owner_id == current_user.id,models.Orders.payment == False).all()
     total = total[0][0]
     if total == None:
         total = 0
-        return "You haven't placed any order"
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="You haven't placed any order")
     total  = {"total": int(f"{total}")}
     return total
 
-
-@router.get("/checkout")
+# Returns the orders that are in cart
+@router.get("/cart",status_code=status.HTTP_202_ACCEPTED)
 def checkout(db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
-    orders_query = db.query(models.Orders).filter(models.Orders.owner_id==current_user.id,models.Orders.payment == False)
+    orders_query = db.query(models.Orders).filter(models.Orders.owner_id==current_user.id,
+                             models.Orders.payment == False)
     orders = orders_query.all()
-    total = total_cost(db=db)
+    total = total_cost(db=db,current_user=current_user)
     return orders
 
+# Creates a new order, stores it in the db and returns a response
 @router.post("/main",status_code=status.HTTP_201_CREATED,)
 def order_main_dish(user_order:schemas.Order, db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
     order = db.query(models.MainDish).filter(models.MainDish.id == user_order.id).first()
-    price = order.price
-    if not user_order:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="meal doesn't exist")
+    if not order:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f"meal with {user_order} doesn't exist")
+    price = order.price    
     new_order = models.Orders(owner_id=current_user.id,order_id=order.id,food=order.main_dish,price=price)
     db.add(new_order)
     db.commit()
-    total = total_cost(db=db)
-    return f"message:" "You've successfully placed your order,"  f" (subtotal: ₦{total['total']})"
-    
+    total = total_cost(db=db,current_user=current_user)
+    return f"message:" "You've successfully placed your order,"  f" [subtotal: ₦{total['total']}]"
+
+# Creates a new order, stores it in the db and returns a response
 @router.post("/side",status_code=status.HTTP_201_CREATED,)
-def order_side_dish(order:schemas.Order, db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
+def order_side_dish(user_order:schemas.Order, db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
     order = db.query(models.SideDish).filter(models.SideDish.id == order.id).first()
-    price = order.price
-    if not order:
+    if not user_order:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="meal doesn't exist")
     new_order = models.Orders(owner_id=current_user.id,order_id=order.id,food=order.side_dish,price=price)
     db.add(new_order)
     db.commit()
-    total = total_cost(db=db)
-    return f"message:" "You've successfully placed your order,"  f" (subtotal: ₦{total})"
+    total = total_cost(db=db,current_user=current_user)
+    return f"message:" "You've successfully placed your order,"  f" (subtotal: ₦{total['total']}"
     
 @router.post("/desert",status_code=status.HTTP_201_CREATED,)
 def order_desert(order:schemas.Order, db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
