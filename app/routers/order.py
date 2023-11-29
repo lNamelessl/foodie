@@ -81,33 +81,34 @@ def order_drinks(order:schemas.Order, db: Session = Depends(get_db),current_user
     db.commit()
     return f"Message: You've successfully placed your order,"  f" [subtotal: ₦{total['total']}]"
 
-@router.delete("/delete_order",)
+# Deletes a selected order
+@router.delete("/delete_order")
 def delete_order(order: schemas.Order, db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
     query = db.query(models.Orders).filter(models.Orders.id == order.id)
     order = query.first()
     if order == None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"order does not exist")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"order does not exist :(")
     if order.owner_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="not authorised to perform this action")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="not authorised to perform this action :(")
     query.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
  
-
-@router.put("/payment",status_code=status.HTTP_202_ACCEPTED,response_model=List[schemas.CheckOut])
+# Takes users payment and finalises order
+@router.put("/checkout",status_code=status.HTTP_202_ACCEPTED,response_model=List[schemas.CheckOut])
 def payment(payment:schemas.Payment, db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
-    total = total_cost(db=db)
+    total = total_cost(db=db,current_user=current_user)
     payment= payment.model_dump()
     payment = payment["payment"]
     total = total["total"]
-    if total == payment:
-        orders_query = db.query(models.Orders).filter(models.Orders.owner_id==current_user.id,models.Orders.payment == True)
-        updated_payment = Update(Orders).where(Orders.owner_id == current_user.id ).values(payment = True)
-        db.execute(updated_payment)
-        db.commit()
-        return  orders_query.all()
+    if total > payment:
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED,detail="Not enough amount of money")
+    elif total < payment:
+        raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED,detail="Too much amount of money")
+    orders_query = db.query(models.Orders).filter(models.Orders.owner_id==current_user.id,models.Orders.payment == True)
+    updated_payment = Update(Orders).where(Orders.owner_id == current_user.id ).values(payment = True)
+    db.execute(updated_payment)
+    db.commit()
+    return  orders_query.all()
     
 
-
-
-# track user orders, calculate amount and checkout

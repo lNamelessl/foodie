@@ -31,8 +31,7 @@ class Drinks(Base):
     drinks = Column(String,nullable=False)
     price = Column(Integer,nullable=False)
     id = Column(Integer,primary_key=True,nullable=False)
-
-    
+  
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer,primary_key=True,nullable=False)
@@ -43,7 +42,6 @@ class User(Base):
     phone_number = Column(String,nullable=True)
     orders = Column(String,nullable=False,unique=True)
     orders = relationship("Orders", back_populates="owner")
-
 
 class Orders(Base):
     __tablename__ = "orders"
