@@ -1,23 +1,25 @@
-from fastapi import FastAPI,APIRouter,HTTPException,status,Response,Depends
+from fastapi import APIRouter,HTTPException,status,Response,Depends
 from app import schemas,models,oauth2
 from sqlalchemy.orm import Session
 from app.database import get_db
 from typing import List
-from pydantic import BaseModel, Field
 from app.models import Orders
 from sqlalchemy import func,Update
 
-app = FastAPI()
-router = APIRouter(prefix="/order", tags=["Order"])
 
-@router.get("/total",)
+router = APIRouter(tags=["Order"])
+
+# Adds all the price columns and returns the total
+@router.get("/total",status_code=status.HTTP_202_ACCEPTED)
 def total_cost(db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
-    total = db.query(func.sum(models.Orders.price)).all()
+    total = db.query(func.sum(models.Orders.price)).filter(models.Orders.owner_id == current_user.id).all()
     total = total[0][0]
     if total == None:
         total = 0
+        return "You haven't placed any order"
     total  = {"total": int(f"{total}")}
     return total
+
 
 @router.get("/checkout")
 def checkout(db: Session = Depends(get_db),current_user: int = Depends(oauth2.get_current_user)):
