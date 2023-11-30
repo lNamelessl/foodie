@@ -28,7 +28,7 @@ class CheckOut(BaseModel):
     food: str
     price: int
     created_at:datetime
-    payment:bool
+    payment:bool 
   
 class TotalCost(BaseModel):
     total:int
@@ -36,4 +36,7 @@ class TotalCost(BaseModel):
 class Payment(BaseModel):
     payment:int
 
+class Cart(BaseModel):
+    orders: str
+    total: int
 
