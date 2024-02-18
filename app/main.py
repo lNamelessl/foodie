@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends
 from .database import get_db
 from sqlalchemy.orm import Session
-from . import models
+from . import models,oauth2
 from .routers import food,order,user,auth
 from fastapi.middleware.cors import CORSMiddleware
 
