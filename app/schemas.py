@@ -1,6 +1,4 @@
-from pyclbr import Class
-from typing import Optional
-from pydantic import BaseModel, EmailStr, conint
+from pydantic import BaseModel, EmailStr
 from datetime import datetime
 
 

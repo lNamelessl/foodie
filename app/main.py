@@ -1,7 +1,4 @@
-from fastapi import FastAPI, Depends
-from .database import get_db
-from sqlalchemy.orm import Session
-from . import models, oauth2
+from fastapi import FastAPI
 from .routers import food, order, user, auth
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -10,7 +7,7 @@ app = FastAPI()
 
 @app.get("/")
 def say_hello():
-    return "Hello World👨🏼👨🏼👨🏼"
+    return "Hello, Everything works"
 
 
 app.include_router(food.router)

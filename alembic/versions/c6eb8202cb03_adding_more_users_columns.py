@@ -24,10 +24,8 @@ def upgrade() -> None:
         "users",
         sa.Column("order", sa.String(), nullable=True),
     )
-    
 
 
 def downgrade() -> None:
     op.drop_column("order")
     op.drop_column("phone_number")
-    

@@ -22,17 +22,12 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.create_table(
         "orders",
-        sa.Column("id", sa.Integer(), nullable=False, primary_key=True),
+        sa.Column("id", sa.Integer(), primary_key=True),
         sa.Column("food", sa.String(), nullable=False),
         sa.Column("price", sa.Integer(), nullable=False),
         sa.Column("owner_id", sa.Integer(), nullable=False),
     )
-    # sa.ForeignKeyConstraint('orders_users_fk',source_table="orders",referent_table="users"),
-    # refcolumns="columns=ousers,orders" ,local_cols=['owner_id'],remote_cols=['id'],ondelete="CASCADE")
-    
 
 
 def downgrade() -> None:
-    # op.drop_constraint('orders_users_fk',table_name='orders')
     op.drop_table("orders")
-    

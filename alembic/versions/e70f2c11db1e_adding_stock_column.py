@@ -20,10 +20,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column("orders", sa.Column("Stock_Quantity", sa.Integer, nullable=True))
-    
+    op.add_column("orders", sa.Column("Stock_Quantity", sa.Integer, nullable=False))
 
 
 def downgrade() -> None:
     op.drop_column("orders", "Stock_Quantity")
-    

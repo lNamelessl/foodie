@@ -28,9 +28,7 @@ def upgrade() -> None:
         remote_cols=["id"],
         ondelete="CASCADE",
     )
-    
 
 
 def downgrade() -> None:
     op.drop_constraint("orders_users_fk", table_name="orders")
-    

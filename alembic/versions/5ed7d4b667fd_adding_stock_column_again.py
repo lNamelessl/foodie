@@ -25,7 +25,6 @@ def upgrade() -> None:
     op.add_column("side_dish", sa.Column("Stock_Quantity", sa.Integer, nullable=True))
     op.add_column("drinks", sa.Column("Stock_Quantity", sa.Integer, nullable=True))
     op.add_column("desert", sa.Column("Stock_Quantity", sa.Integer, nullable=True))
-    
 
 
 def downgrade() -> None:
@@ -34,4 +33,3 @@ def downgrade() -> None:
     op.drop_column("side_dish", "Stock_Quantity")
     op.drop_column("drinks", "Stock_Quantity")
     op.drop_column("desert", "Stock_Quantity")
-    

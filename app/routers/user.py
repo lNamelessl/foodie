@@ -1,22 +1,33 @@
 from fastapi import APIRouter, HTTPException, status, Response, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from ..database import get_db
 from .. import models, schemas, utils
-from sqlalchemy.exc import IntegrityError
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-# Takes in users credentials and create a new user
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserOut)
 def create_user(
     user: schemas.UserCreate,
     db: Session = Depends(get_db),
 ):
+    """This function creates a user
+
+    Args:
+        user (schemas.UserCreate): The user object
+        db (Session):The database session
+
+    Raises:
+        HTTPException[226]: User already exists
+
+    Returns:
+        models.User: The user object
+    """
     if IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_226_IM_USED,
-            detail="User with that Email already exist😐",
+            detail="User already exists😐",
         )
     hashed_password = utils.hash(user.password)
     user.password = hashed_password
@@ -27,12 +38,23 @@ def create_user(
     return new_user
 
 
-# Returns user details
 @router.get("/{id}", response_model=schemas.UserOut)
 def get_user(
     id: int,
     db: Session = Depends(get_db),
 ):
+    """This functions gets a user
+
+    Args:
+        id (int): The user ID
+        db (Sessionl): The database session
+
+    Raises:
+        HTTPException[404]: User not found
+
+    Returns:
+        models.User: The user object
+    """
     user = db.query(models.User).filter(models.User.id == id).first()
 
     if not user:

@@ -24,9 +24,7 @@ def upgrade() -> None:
         "orders",
         sa.Column("order_id", sa.Integer(), nullable=True),
     )
-    
 
 
 def downgrade() -> None:
     op.drop_column("order_id")
-    
